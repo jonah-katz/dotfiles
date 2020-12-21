@@ -1,3 +1,9 @@
+if empty(glob('~/.vim/autoload/plug.vim'))
+  silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
+    \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+endif
+
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => General
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -26,6 +32,7 @@ endif
 
 " allow copy to clipboard to equal yank
 set clipboard=unnamed
+
 
 " faster redrawing
 set ttyfast
@@ -90,7 +97,7 @@ set mat=2 " how many tenths of a second to blink
 " switch syntax highlighting on
 syntax on
 
-set background=light
+set background=dark
 
 
 " set number " show line numbers
@@ -155,6 +162,7 @@ Plug 'cakebaker/scss-syntax.vim'
 Plug 'kchmck/vim-coffee-script'
 Plug 'digitaltoad/vim-pug'
 Plug 'wavded/vim-stylus'
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
 call plug#end()
 
@@ -175,12 +183,19 @@ endif
 nnoremap K :Ag<SPACE>-i<SPACE>! "\b<C-R><C-W>\b"<CR>:cw<CR>
 
 " bind \ (backward slash) to grep shortcut
-command -nargs=+ -complete=file -bar Ag silent! grep! <args>|cwindow|redraw!
+" command -nargs=+ -complete=file -bar Ag silent! grep! <args>|cwindow|redraw!
 
 nnoremap \ :Ag<SPACE>-i<SPACE>-Q<SPACE>
 
 " map tabs
 map go :tabonly<ENTER>
+
+" switch panes
+nnoremap <C-J> <C-W><C-J>
+nnoremap <C-K> <C-W><C-K>
+nnoremap <C-L> <C-W><C-L>
+nnoremap <C-H> <C-W><C-H>
+
 
 
 let g:deoplete#enable_at_startup = 1
@@ -190,7 +205,7 @@ let g:deoplete#sources#omni#input_patterns = {
 \}
 
 let g:lightline = {
-      \ 'colorscheme': 'seoul256',
+      \ 'colorscheme': 'seoul256-light',
       \ 'active': {
       \   'left': [ [ 'mode', 'paste' ], [ 'fugitive', 'filename' ], ['ctrlpmark'] ],
       \   'right': [ [ 'syntastic', 'lineinfo' ], ['percent'], [ 'fileformat', 'fileencoding', 'filetype' ] ]
@@ -341,7 +356,6 @@ augroup myvimrc
     autocmd QuickFixCmdPost l*    lwindow
 augroup END
 
-" automaticlalt reload vimrc
 augroup myvimrchooks
     au!
     autocmd bufwritepost .vimrc source ~/.vimrc
@@ -349,12 +363,18 @@ augroup END
 
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 
+" COC automcomplete vim
+let g:coc_global_extensions = [ 'coc-tsserver' ]
+" GoTo code navigation.
+nmap <silent> gd <Plug>(coc-definition)
+nmap <silent> gy <Plug>(coc-type-definition)
+nmap <silent> gi <Plug>(coc-implementation)
+nmap <silent> gr <Plug>(coc-references)
 
-"""""""""""""" for powerline font install """""""""""""""""
-" $ git clone https://github.com/powerline/fonts.git
-" $ ./fonts/install.sh
-" Favorite font: Roboto Mono Med For Powerline
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Using the silver searcher in place of grep
-" $ brew install the_silver_searcher
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+" automatically reload vimrc
+augroup myvimrc
+    au!
+    au BufWritePost .vimrc,_vimrc,vimrc,.gvimrc,_gvimrc,gvimrc so $MYVIMRC | if has('gui_running') | so $MYGVIMRC | endif
+augroup END
+
