@@ -159,10 +159,10 @@ Plug 'junegunn/seoul256.vim'
 Plug 'elmcast/elm-vim'
 Plug 'vim-ruby/vim-ruby'
 Plug 'cakebaker/scss-syntax.vim'
-Plug 'kchmck/vim-coffee-script'
 Plug 'digitaltoad/vim-pug'
 Plug 'wavded/vim-stylus'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'rking/ag.vim'
 
 call plug#end()
 
@@ -172,12 +172,18 @@ if executable('ag')
   set grepprg=ag\ --nogroup\ --nocolor
 
   " Use ag in CtrlP for listing files. Lightning fast and respects .gitignore
-  let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
-
-
+  " let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
   " ag is fast enough that CtrlP doesn't need to cache
-  let g:ctrlp_use_caching = 0
+"  let g:ctrlp_use_caching = 0
 endif
+
+  let g:ctrlp_user_command = ['.git', 'cd %s && git ls-files -co --exclude-standard']
+  let g:ctrlp_custom_ignore = {
+    \ 'dir':  '\v[\/]\.(git|hg|svn|Pods|node_moduels|AmazonChimeSDK.xcframework)$',
+    \ 'file': '\v\.(exe|so|dll)$',
+    \ 'link': 'some_bad_symbolic_links',
+    \ }
+
 
 " bind K to grep word under cursor
 nnoremap K :Ag<SPACE>-i<SPACE>! "\b<C-R><C-W>\b"<CR>:cw<CR>
@@ -370,6 +376,16 @@ nmap <silent> gd <Plug>(coc-definition)
 nmap <silent> gy <Plug>(coc-type-definition)
 nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
+" coc use <tab> for trigger completion and navigate to the next complete item
+function! s:check_back_space() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~ '\s'
+endfunction
+inoremap <silent><expr> <Tab>
+      \ pumvisible() ? "\<C-n>" :
+      \ <SID>check_back_space() ? "\<Tab>" :
+      \ coc#refresh()
+
 
 
 " automatically reload vimrc
